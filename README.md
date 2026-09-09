@@ -61,6 +61,34 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
+### Local example: MiniMind
+
+`qvac_sdk.openai_compat` works against any OpenAI-compatible server, not just
+QVAC itself — this is the first live end-to-end proof (everything else in
+this SDK's test suite is currently mocked). [MiniMind](https://github.com/jingyaogong/minimind)
+is a ~64M-param LLM trained from scratch on a Kaggle T4 and served locally on
+CPU via its own OpenAI-compatible endpoint.
+
+```bash
+git clone https://github.com/jingyaogong/minimind
+cd minimind/scripts && python3 serve_openai_api.py --weight full_sft --device cpu
+# serves http://localhost:8998
+```
+
+```python
+from qvac_sdk.openai_compat import QVACOpenAI
+
+client = QVACOpenAI(base_url="http://localhost:8998")
+response = client.chat.completions.create(
+    model="local",
+    messages=[{"role": "user", "content": "你有什么特长？"}],
+    stream=False,  # MiniMind's server defaults to streaming
+)
+print(response.choices[0].message.content)
+```
+
+Full runnable version: `examples/minimind_demo.py`.
+
 ### Speech-to-text
 
 ```python
